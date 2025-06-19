@@ -129,7 +129,8 @@ func (s *service) AgentAssignment(ctx context.Context, roomId int64) error {
 			return nil
 		}
 	}
-	return nil
+
+	return fmt.Errorf("no agent available")
 }
 
 func (s *service) RePublishSingleQueue(ctx context.Context, enqueueData dto.PayloadChatAssign) error {

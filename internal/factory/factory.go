@@ -4,6 +4,7 @@ import (
 	"agent-assigner/database"
 	"agent-assigner/pkg/util"
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -23,7 +24,20 @@ func NewFactory(ctx context.Context) *Factory {
 
 // setAsynqRedisOpt is a function to set asynq redis option
 func (f *Factory) setAsynqRedisOpt() {
-	f.asynqRedisOpt = database.GetRedisOpt()
+	opt := database.GetRedisOpt()
+
+	client := asynq.NewClient(opt)
+	defer client.Close()
+
+	// Attempt a dummy task enqueue as a health check
+	_, err := client.Enqueue(asynq.NewTask("debug:ping", nil), asynq.MaxRetry(0))
+	if err != nil {
+		fmt.Printf("[REDIS] ❌ Failed to connect to Redis at %s (DB: %d): %v\n", opt.Addr, opt.DB, err)
+	} else {
+		fmt.Printf("[REDIS] ✅ Connected to Redis at %s (DB: %d)\n", opt.Addr, opt.DB)
+	}
+
+	f.asynqRedisOpt = opt
 }
 
 // setAsynqWorker is a function to set asynq worker, using for asynq consumer

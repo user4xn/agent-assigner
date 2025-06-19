@@ -6,11 +6,6 @@ type (
 		Meta any `json:"meta"`
 	}
 
-	ResponseAPICountUnserved struct {
-		TotalUnresolved int `json:"total_unresolved"`
-		TotalUnserved   int `json:"total_unserved"`
-	}
-
 	BodyAPIChatRoom struct {
 		Channels       []Channel `json:"channels"`
 		UserIds        []any     `json:"user_ids"`
@@ -55,5 +50,45 @@ type (
 		Source                  *string     `json:"source,omitempty"`
 		UserAvatarURL           *string     `json:"user_avatar_url,omitempty"`
 		UserID                  *string     `json:"user_id,omitempty"`
+	}
+
+	ResponseOtherAgent struct {
+		Agents []Agent `json:"agents"`
+	}
+
+	Agent struct {
+		AvatarURL            string        `json:"avatar_url"`
+		CreatedAt            string        `json:"created_at"`
+		CurrentCustomerCount int64         `json:"current_customer_count"`
+		Email                string        `json:"email"`
+		ForceOffline         bool          `json:"force_offline"`
+		ID                   int64         `json:"id"`
+		IsAvailable          bool          `json:"is_available"`
+		IsReqOtpReset        any           `json:"is_req_otp_reset"`
+		LastLogin            *string       `json:"last_login"`
+		Name                 string        `json:"name"`
+		SDKEmail             string        `json:"sdk_email"`
+		SDKKey               string        `json:"sdk_key"`
+		Type                 int64         `json:"type"`
+		TypeAsString         string        `json:"type_as_string"`
+		UserChannels         []UserChannel `json:"user_channels"`
+		UserRoles            []UserRole    `json:"user_roles"`
+	}
+
+	UserChannel struct {
+		ID   int64  `json:"id"`
+		Name string `json:"name"`
+	}
+
+	UserRole struct {
+		ID   int64  `json:"id"`
+		Name string `json:"name"`
+	}
+
+	BodyAssignAgent struct {
+		AgentID            int64   `json:"agent_id"`
+		RoomID             int64   `json:"room_id"`
+		ReplaceLatestAgent *string `json:"replace_latest_agent"`
+		MaxAgent           *string `json:"max_agent"`
 	}
 )

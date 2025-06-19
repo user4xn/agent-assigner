@@ -2,6 +2,7 @@ package main
 
 import (
 	"agent-assigner/internal/api"
+	"agent-assigner/internal/consumer"
 	"agent-assigner/internal/factory"
 	"agent-assigner/pkg/util"
 	"context"
@@ -13,10 +14,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 )
-
-// main is the entry point of the application. It parses a command-line flag "m"
-// to determine the mode of operation. Depending on the flag value, it either
-// starts a consumer or a scheduler. If an unknown mode is provided, it outputs an error.
 
 func main() {
 	var (
@@ -32,10 +29,14 @@ func main() {
 
 	flag.Parse()
 
+	ctx := context.Background()
+
 	if m != "" {
 		// consumer mode will consume messages from the queue
 		if m == "consumer" {
 			fmt.Println("Starting consumer")
+			con := consumer.NewConsumer(factory.NewFactory(ctx).BuildConsumerFactory())
+			con.Init()
 			return
 		}
 
@@ -45,7 +46,6 @@ func main() {
 
 	// initiate router framework
 	r := chi.NewRouter()
-	ctx := context.Background()
 
 	// add CORS middleware
 	cors := cors.New(cors.Options{

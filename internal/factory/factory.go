@@ -28,7 +28,7 @@ func (f *Factory) setAsynqRedisOpt() {
 // setAsynqWorker is a function to set asynq worker, using for asynq consumer
 func (f *Factory) setAsynqWorker(queues map[string]int) {
 	worker, _ := strconv.Atoi(util.GetEnv("ASYNQ_CONCURRENCY", "1"))
-	retryDelay, _ := strconv.Atoi(util.GetEnv("ASYNQ_RETRY_DELAY", "2"))
+	retryDelay, _ := strconv.Atoi(util.GetEnv("ASYNQ_RETRY_DELAY", "5"))
 	f.AsynqWorker = asynq.NewServer(f.asynqRedisOpt, asynq.Config{
 		Concurrency: worker, // Number of workers to process tasks concurrently
 		Queues:      queues,

@@ -12,8 +12,9 @@ import (
 )
 
 type QiscusClientInterface interface {
-	CountUnservedChat(adminToken string) (dto.ResponseAPICountUnserved, error)
 	FetchUnservedRoom(body dto.BodyAPIChatRoom) (dto.ResponseAPIChatRoom, error)
+	FetchOtherAgent(roomId int64) (dto.ResponseOtherAgent, error)
+	AssignAgent(body dto.BodyAssignAgent) error
 }
 
 type QiscusClient struct {
@@ -30,51 +31,6 @@ func NewQiscusClient() *QiscusClient {
 		AppIDCode: util.GetEnv("QISCUS_APP_ID_CODE", "fallback"),
 		AppSecret: util.GetEnv("QISCUS_APP_SECRET", "fallback"),
 	}
-}
-
-func (c *QiscusClient) CountUnservedChat(adminToken string) (dto.ResponseAPICountUnserved, error) {
-	source := c.BaseUrl + "/api/v2/admin/service/total_unserved"
-	headersMap := map[string]string{
-		"Content-Type":  "application/json",
-		"Authorization": adminToken,
-		"Qiscus-app-id": c.AppIDCode,
-	}
-
-	res, err := helper.GetRequest(c.Http, source, nil, headersMap)
-	if err != nil {
-		return dto.ResponseAPICountUnserved{}, err
-	}
-	defer helper.ClientClose(res)
-
-	if res.StatusCode != 200 {
-		if res.StatusCode == 401 {
-			return dto.ResponseAPICountUnserved{}, fmt.Errorf("unauthorized")
-		}
-
-		err := fmt.Errorf("error count unserved chat status code: %d, body: %s", res.StatusCode, util.ResponseBodyToString(res))
-		log.Print(err)
-		return dto.ResponseAPICountUnserved{}, err
-	}
-
-	var commonResponse dto.CommonResponse
-	if err := json.NewDecoder(res.Body).Decode(&commonResponse); err != nil {
-		log.Println(err)
-		return dto.ResponseAPICountUnserved{}, err
-	}
-
-	byteData, err := json.Marshal(commonResponse.Data)
-	if err != nil {
-		log.Println(err)
-		return dto.ResponseAPICountUnserved{}, err
-	}
-
-	var response dto.ResponseAPICountUnserved
-	if err := json.Unmarshal(byteData, &response); err != nil {
-		log.Println(err)
-		return dto.ResponseAPICountUnserved{}, err
-	}
-
-	return response, nil
 }
 
 func (c *QiscusClient) FetchUnservedRoom(body dto.BodyAPIChatRoom) (dto.ResponseAPIChatRoom, error) {
@@ -127,4 +83,89 @@ func (c *QiscusClient) FetchUnservedRoom(body dto.BodyAPIChatRoom) (dto.Response
 	}
 
 	return response, nil
+}
+
+func (c *QiscusClient) FetchOtherAgent(roomId int64) (dto.ResponseOtherAgent, error) {
+	source := c.BaseUrl + "/api/v2/admin/service/othera_agents?limit=15&room_id=" + fmt.Sprintf("%d", roomId)
+	headersMap := map[string]string{
+		"Content-Type":      "application/json",
+		"Qiscus-App-Id":     c.AppIDCode,
+		"Qiscus-Secret-Key": c.AppSecret,
+	}
+
+	res, err := helper.GetRequest(c.Http, source, nil, headersMap)
+	if err != nil {
+		return dto.ResponseOtherAgent{}, err
+	}
+	defer helper.ClientClose(res)
+
+	if res.StatusCode != 200 {
+		if res.StatusCode == 401 {
+			return dto.ResponseOtherAgent{}, fmt.Errorf("unauthorized while fetching other agent")
+		}
+
+		err := fmt.Errorf("error other agent status code: %d, body: %s", res.StatusCode, util.ResponseBodyToString(res))
+		log.Print(err)
+		return dto.ResponseOtherAgent{}, err
+	}
+
+	var commonResponse dto.CommonResponse
+	if err := json.NewDecoder(res.Body).Decode(&commonResponse); err != nil {
+		log.Println(err)
+		return dto.ResponseOtherAgent{}, err
+	}
+
+	byteData, err := json.Marshal(commonResponse.Data)
+	if err != nil {
+		log.Println(err.Error())
+		return dto.ResponseOtherAgent{}, err
+	}
+
+	var response dto.ResponseOtherAgent
+	if err := json.Unmarshal(byteData, &response); err != nil {
+		log.Println(err)
+		return dto.ResponseOtherAgent{}, err
+	}
+
+	return response, nil
+}
+
+func (c *QiscusClient) AssignAgent(body dto.BodyAssignAgent) error {
+	source := c.BaseUrl + "/api/v1/admin/service/assign_agent"
+	headersMap := map[string]string{
+		"Content-Type":      "application/json",
+		"Qiscus-App-Id":     c.AppIDCode,
+		"Qiscus-Secret-Key": c.AppSecret,
+	}
+
+	reqJson, err := json.Marshal(body)
+	if err != nil {
+		return err
+	}
+
+	reqBody := strings.NewReader(string(reqJson))
+
+	res, err := helper.PostRequest(c.Http, source, reqBody, headersMap)
+	if err != nil {
+		return err
+	}
+	defer helper.ClientClose(res)
+
+	if res.StatusCode != 200 {
+		if res.StatusCode == 401 {
+			return fmt.Errorf("unauthorized while assigning an agent %d into room id: %d", body.AgentID, body.RoomID)
+		}
+
+		err := fmt.Errorf("error assigning an agent status code: %d, body: %s", res.StatusCode, util.ResponseBodyToString(res))
+		log.Print(err)
+		return err
+	}
+
+	var commonResponse dto.CommonResponse
+	if err := json.NewDecoder(res.Body).Decode(&commonResponse); err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return nil
 }

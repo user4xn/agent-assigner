@@ -50,6 +50,8 @@ func (s *service) WebhookAssigment(ctx context.Context) error {
 		ServeStatus: &serveStatus,
 	}
 
+	time.Sleep(3 * time.Second) // delay 3s to prevent race condition webhook hit & room fetch
+
 	fetchRoom, err := s.qiscusClient.FetchUnservedRoom(body)
 	if err != nil {
 		return err
@@ -85,7 +87,6 @@ func (s *service) WebhookAssigment(ctx context.Context) error {
 			// set max retry, unique key for avoiding duplicate task, also the pattern
 			opts := []asynq.Option{
 				asynq.MaxRetry(3),
-				asynq.ProcessIn(5 * time.Second),
 				asynq.Unique(1 * time.Minute),
 				asynq.Queue(s.patternChatAssign),
 			}

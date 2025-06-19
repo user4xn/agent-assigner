@@ -16,7 +16,7 @@ type (
 )
 
 func (conf redisConfig) Configure() {
-	// Create redis connection
+	// configure redis
 	redisOpt = asynq.RedisClientOpt{
 		Addr:     fmt.Sprintf("%s:%s", conf.Host, conf.Port),
 		Password: conf.Pass,

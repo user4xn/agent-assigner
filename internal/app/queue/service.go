@@ -16,13 +16,14 @@ type Service interface {
 	Enqueue(ctx context.Context, pattern string, payload []byte, opts ...asynq.Option) error
 }
 
-// A function to call factory to initialize database connection to this/these repository
+// function to call factory to these repository
 func NewService(f *factory.Factory) Service {
 	return &service{
 		queuer: f.AsynqClient,
 	}
 }
 
+// function to enqueue task sparately
 func (s *service) Enqueue(ctx context.Context, pattern string, payload []byte, opts ...asynq.Option) error {
 	task := asynq.NewTask(pattern, payload, opts...)
 

@@ -1,6 +1,7 @@
 package dto
 
 type (
+	// common response struct
 	Response struct {
 		Meta Meta `json:"meta"`
 		Data any  `json:"data"`
@@ -12,6 +13,7 @@ type (
 		Status  string `json:"status"`
 	}
 
+	// server info struct
 	ServerInfo struct {
 		ServiceName string `json:"service_name"`
 		Version     string `json:"version"`

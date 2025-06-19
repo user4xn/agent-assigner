@@ -14,6 +14,7 @@ var (
 )
 
 func CreateConnection() {
+	// get redis config from env
 	REDIS_DB, err := strconv.Atoi(util.GetEnv("REDIS_DB", "0"))
 	if err != nil {
 		panic(err)
@@ -26,12 +27,13 @@ func CreateConnection() {
 		DB:   REDIS_DB,
 	}
 
+	// configure once
 	once.Do(func() {
 		redis.Configure()
 	})
 }
 
-// Check redis connection, if exist return the memory address of the redis connection
+// check redis connection, if exist return the memory address of the redis connection
 func GetRedisOpt() asynq.RedisClientOpt {
 	if redisOpt == (asynq.RedisClientOpt{}) {
 		CreateConnection()

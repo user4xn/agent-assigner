@@ -1,11 +1,13 @@
 package dto
 
 type (
+	// common response struct, default recieved response from API
 	CommonResponse struct {
 		Data any `json:"data"`
 		Meta any `json:"meta"`
 	}
 
+	// body payload for fetching unserved room
 	BodyAPIChatRoom struct {
 		Channels       []Channel `json:"channels"`
 		UserIds        []any     `json:"user_ids"`
@@ -25,6 +27,7 @@ type (
 		Source    string `json:"source"`
 	}
 
+	// response struct for fetching unserved room
 	ResponseAPIChatRoom struct {
 		CustomerRooms []CustomerRoom `json:"customer_rooms"`
 	}
@@ -52,6 +55,7 @@ type (
 		UserID                  *string     `json:"user_id,omitempty"`
 	}
 
+	// response struct for fetching other agent
 	ResponseOtherAgent struct {
 		Agents []Agent `json:"agents"`
 	}
@@ -85,6 +89,7 @@ type (
 		Name string `json:"name"`
 	}
 
+	// body payload for assigning an agent
 	BodyAssignAgent struct {
 		AgentID            int64   `json:"agent_id"`
 		RoomID             int64   `json:"room_id"`

@@ -21,16 +21,22 @@ func NewFactory(ctx context.Context) *Factory {
 	return &Factory{}
 }
 
+// setAsynqRedisOpt is a function to set asynq redis option
 func (f *Factory) setAsynqRedisOpt() {
 	f.asynqRedisOpt = database.GetRedisOpt()
 }
 
 // setAsynqWorker is a function to set asynq worker, using for asynq consumer
 func (f *Factory) setAsynqWorker(queues map[string]int) {
+	// num of worker to process tasks concurrently
 	worker, _ := strconv.Atoi(util.GetEnv("ASYNQ_CONCURRENCY", "1"))
+
+	// retry delay on each queue when facing failure
 	retryDelay, _ := strconv.Atoi(util.GetEnv("ASYNQ_RETRY_DELAY", "5"))
+
+	// setup async server with configured options
 	f.AsynqWorker = asynq.NewServer(f.asynqRedisOpt, asynq.Config{
-		Concurrency: worker, // Number of workers to process tasks concurrently
+		Concurrency: worker,
 		Queues:      queues,
 		RetryDelayFunc: func(n int, e error, t *asynq.Task) time.Duration {
 			return time.Duration(retryDelay) * time.Second

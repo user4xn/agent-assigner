@@ -18,6 +18,7 @@ func NewHandler(f *factory.Factory) *handler {
 }
 
 func (h *handler) WebhookAssigment(w http.ResponseWriter, r *http.Request) {
+	// call webhook assignment function from service
 	err := h.service.WebhookAssigment(r.Context())
 	if err != nil {
 		log.Println(err)

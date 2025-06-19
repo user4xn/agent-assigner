@@ -6,12 +6,14 @@ import (
 	"net/http"
 )
 
+// helper for closing request client
 func ClientClose(client *http.Response) {
 	if err := client.Body.Close(); err != nil {
 		log.Print(err)
 	}
 }
 
+// helper for get request
 func GetRequest(client *http.Client, url string, body io.Reader, headers map[string]string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", url, body)
 	if err != nil {
@@ -30,6 +32,7 @@ func GetRequest(client *http.Client, url string, body io.Reader, headers map[str
 	return response, nil
 }
 
+// helper for post request
 func PostRequest(client *http.Client, url string, body io.Reader, headers map[string]string) (*http.Response, error) {
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {

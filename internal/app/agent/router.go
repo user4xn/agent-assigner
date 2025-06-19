@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// group webhook route
 func (h *handler) WebhookRouter(r chi.Router) {
 	// add timing middleware for tracking time
 	r.Use(middleware.Timing)

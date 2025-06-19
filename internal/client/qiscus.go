@@ -11,6 +11,8 @@ import (
 	"strings"
 )
 
+// this client file sparatedly to handle api request into the client (qiscus.com)
+
 type QiscusClientInterface interface {
 	FetchUnservedRoom(body dto.BodyAPIChatRoom) (dto.ResponseAPIChatRoom, error)
 	FetchOtherAgent(roomId int64) (dto.ResponseOtherAgent, error)
@@ -24,6 +26,7 @@ type QiscusClient struct {
 	AppSecret string
 }
 
+// set globally required variable to hit qiscus api
 func NewQiscusClient() *QiscusClient {
 	return &QiscusClient{
 		Http:      &http.Client{},
@@ -34,13 +37,17 @@ func NewQiscusClient() *QiscusClient {
 }
 
 func (c *QiscusClient) FetchUnservedRoom(body dto.BodyAPIChatRoom) (dto.ResponseAPIChatRoom, error) {
+	// url builder for request
 	source := c.BaseUrl + "/api/v2/customer_rooms"
+
+	// set header of request
 	headersMap := map[string]string{
 		"Content-Type":      "application/json",
 		"Qiscus-App-Id":     c.AppIDCode,
 		"Qiscus-Secret-Key": c.AppSecret,
 	}
 
+	// convert body to json
 	reqJson, err := json.Marshal(body)
 	if err != nil {
 		return dto.ResponseAPIChatRoom{}, err
@@ -64,18 +71,21 @@ func (c *QiscusClient) FetchUnservedRoom(body dto.BodyAPIChatRoom) (dto.Response
 		return dto.ResponseAPIChatRoom{}, err
 	}
 
+	// convert response to struct
 	var commonResponse dto.CommonResponse
 	if err := json.NewDecoder(res.Body).Decode(&commonResponse); err != nil {
 		log.Println(err)
 		return dto.ResponseAPIChatRoom{}, err
 	}
 
+	// but the data not declared spesifically, need to convert into json again
 	byteData, err := json.Marshal(commonResponse.Data)
 	if err != nil {
 		log.Println(err)
 		return dto.ResponseAPIChatRoom{}, err
 	}
 
+	// then we unmarshal data into spesific struct
 	var response dto.ResponseAPIChatRoom
 	if err := json.Unmarshal(byteData, &response); err != nil {
 		log.Println(err)
@@ -86,7 +96,7 @@ func (c *QiscusClient) FetchUnservedRoom(body dto.BodyAPIChatRoom) (dto.Response
 }
 
 func (c *QiscusClient) FetchOtherAgent(roomId int64) (dto.ResponseOtherAgent, error) {
-	source := c.BaseUrl + "/api/v2/admin/service/othera_agents?limit=15&room_id=" + fmt.Sprintf("%d", roomId)
+	source := c.BaseUrl + "/api/v2/admin/service/other_agents?limit=15&room_id=" + fmt.Sprintf("%d", roomId)
 	headersMap := map[string]string{
 		"Content-Type":      "application/json",
 		"Qiscus-App-Id":     c.AppIDCode,

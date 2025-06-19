@@ -7,6 +7,7 @@ import (
 )
 
 func Timing(next http.Handler) http.Handler {
+	// time tracker middleware for each request
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		next.ServeHTTP(w, r)

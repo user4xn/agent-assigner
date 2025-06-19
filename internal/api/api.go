@@ -11,11 +11,12 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// parent routing system
 func NewAPI(r *chi.Mux, f *factory.Factory) {
 	// default index route return service info
 	r.Get("/", Index)
 
-	// grouping v1 api
+	// grouping v1 api passing to individual routes each app
 	r.Route("/api/v1/agent", func(r chi.Router) {
 		agent.NewHandler(f).WebhookRouter(r)
 	})

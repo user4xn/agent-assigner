@@ -40,6 +40,7 @@ func NewService(f *factory.Factory) Service {
 	}
 }
 
+// fetch unserved room and publish queue on each room id
 func (s *service) WebhookAssigment(ctx context.Context) error {
 	serveStatus := "unserved"
 	limit := int64(50)
@@ -65,15 +66,19 @@ func (s *service) WebhookAssigment(ctx context.Context) error {
 			continue
 		}
 
+		// payload for the queue
 		enqueueData := dto.PayloadChatAssign{
 			RoomID: int64(roomId),
 		}
 
+		// if enqueue task failed, retry 3 times
 		for i := 0; i < 3; i++ {
 			cctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 			defer cancel()
 
+			// convert payload to json
 			payload, _ := json.Marshal(enqueueData)
+			// set max retry, unique key for avoiding duplicate task, also the pattern
 			opts := []asynq.Option{
 				asynq.MaxRetry(3),
 				asynq.Unique(1 * time.Minute),
@@ -91,12 +96,14 @@ func (s *service) WebhookAssigment(ctx context.Context) error {
 }
 
 func (s *service) AgentAssignment(ctx context.Context, roomId int64) error {
+	// get setting of max customer per agent from env
 	maxCustomerInt, err := strconv.Atoi(s.maxCustomerEnv)
 	if err != nil {
 		log.Println("error convert max customer env: ", err)
 		return err
 	}
 
+	// fetch other agent API
 	otherAgent, err := s.qiscusClient.FetchOtherAgent(roomId)
 	if err != nil {
 		log.Println("error fetch other agent: ", err)
@@ -104,6 +111,7 @@ func (s *service) AgentAssignment(ctx context.Context, roomId int64) error {
 	}
 
 	for _, a := range otherAgent.Agents {
+		// if agent is available and not force offline , and current customer count less than max customer, assign to room
 		if a.IsAvailable && !a.ForceOffline && a.CurrentCustomerCount < int64(maxCustomerInt) {
 			log.Println("assigning room id: ", roomId, " to agent : ", a.Email)
 

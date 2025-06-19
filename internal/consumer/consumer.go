@@ -40,8 +40,8 @@ func (c *consumer) Init() {
 
 	log.Println("Consumer with asynq started...")
 
+	// register handler of worker directly
 	c.f.AsynqServer.HandleFunc(c.patternChatAssign, agent.NewHandler(c.f).WorkerChatAssign)
-
 	log.Println("Consumer chat assignment registered...")
 
 	sigChan := make(chan os.Signal, 1)

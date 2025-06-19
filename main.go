@@ -20,6 +20,7 @@ func main() {
 		m string
 	)
 
+	// flagging command
 	flag.StringVar(
 		&m,
 		"m",
@@ -34,12 +35,13 @@ func main() {
 	if m != "" {
 		// consumer mode will consume messages from the queue
 		if m == "consumer" {
-			fmt.Println("Starting consumer")
-			con := consumer.NewConsumer(factory.NewFactory(ctx).BuildConsumerFactory())
+			// initiate consumer binding with factory. builder will prepare the required service
+			con := consumer.NewConsumer(factory.NewFactory(ctx).BuildConsumerChatAssignFactory())
 			con.Init()
 			return
 		}
 
+		// return error log while invalid command mode
 		fmt.Println("Error: Unknown mode")
 		return
 	}
@@ -58,7 +60,7 @@ func main() {
 	})
 	r.Use(cors.Handler)
 
-	// setup api router group bind to chi router & factory
+	// setup api router group bind to chi router & factory. builder prepared the required service to run
 	api.NewAPI(r, factory.NewFactory(ctx).BuildRestFactory())
 
 	// start server

@@ -10,6 +10,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// utility function for get env data
 func GetEnv(key string, fallback string) string {
 	a, _ := godotenv.Read()
 	var (
@@ -23,6 +24,7 @@ func GetEnv(key string, fallback string) string {
 	return val
 }
 
+// help for convert response body to string
 func ResponseBodyToString(resp *http.Response) string {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -32,6 +34,7 @@ func ResponseBodyToString(resp *http.Response) string {
 	return string(body)
 }
 
+// utility function for api response
 func APIResponse(status string, code int, message string, data interface{}) dto.Response {
 	meta := dto.Meta{
 		Message: message,
@@ -47,6 +50,7 @@ func APIResponse(status string, code int, message string, data interface{}) dto.
 	return jsonResponse
 }
 
+// utility function for json response
 func JSON(w http.ResponseWriter, statusCode int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)

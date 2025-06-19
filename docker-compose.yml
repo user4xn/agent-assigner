@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  redis:
+    image: redis:7.2-alpine
+    container_name: agent-redis
+    ports:
+      - "6379:6379"
+
+  rest:
+    build: .
+    container_name: agent-rest
+    depends_on:
+      - redis
+    environment:
+      - SERVER_PORT=8080
+      - REDIS_ADDR=redis:6379
+    ports:
+      - "8080:8080"
+
+  consumer:
+    build: .
+    container_name: agent-consumer
+    depends_on:
+      - redis
+    environment:
+      - REDIS_ADDR=redis:6379
+    command: ["-m=consumer"]

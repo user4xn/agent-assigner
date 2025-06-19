@@ -55,6 +55,10 @@ func (s *service) WebhookAssigment(ctx context.Context) error {
 		return err
 	}
 
+	if len(fetchRoom.CustomerRooms) < 1 {
+		return fmt.Errorf("no unserved room")
+	}
+
 	for _, r := range fetchRoom.CustomerRooms {
 		if r.RoomID == nil {
 			log.Println(fmt.Printf("%v %s", r, "room id is nil"))

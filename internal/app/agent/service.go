@@ -85,6 +85,7 @@ func (s *service) WebhookAssigment(ctx context.Context) error {
 			// set max retry, unique key for avoiding duplicate task, also the pattern
 			opts := []asynq.Option{
 				asynq.MaxRetry(3),
+				asynq.ProcessIn(3 * time.Second),
 				asynq.Unique(1 * time.Minute),
 				asynq.Queue(s.patternChatAssign),
 			}
